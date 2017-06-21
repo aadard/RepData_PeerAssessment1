@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 # Loading and preprocessing the data
-```{r, echo = T, results = 'hide'}
+
+```r
 library(ggplot2)
 
 # unzip the files
@@ -18,7 +14,6 @@ dat <- read.csv("./activity.csv")
 
 # data set with no missing values
 datc <- dat[complete.cases(dat),]
-
 ```
 
 
@@ -26,15 +21,16 @@ datc <- dat[complete.cases(dat),]
 # What is mean total number of steps taken per day?
 
 ### Total nr of steps per day
-```{r, echo = T}
+
+```r
 stepsDay <- aggregate(datc$steps, by = list(datc$date), FUN = sum)
 names(stepsDay) <- c("date", "totalsteps")
-
 ```
 
 
 ### Histogram
-```{r, echo = T}
+
+```r
 ggplot(stepsDay, aes(totalsteps)) + 
           geom_histogram(bins = 50, fill = "dodgerblue", col = "gray71") + 
           theme_bw() + 
@@ -42,13 +38,26 @@ ggplot(stepsDay, aes(totalsteps)) +
           ylab("Frequency")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 ### Mean and median of total nr of steps taken per day
-```{r, echo = T}
+
+```r
 meanTotal <- mean(stepsDay$totalsteps)
 meanTotal
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 medianTotal <- median(stepsDay$totalsteps)
 medianTotal
+```
+
+```
+## [1] 10765
 ```
 
   
@@ -56,13 +65,15 @@ medianTotal
 # What is the average daily activity pattern?
 
 ### Calculate average steps during interval
-```{r, echo = T}
+
+```r
 stepsInterval <- aggregate(datc$steps, by = list(datc$interval), FUN = mean)
 names(stepsInterval) <- c("interval", "meansteps")
 ```
 
 ### Time series plot of average steps agains time interval (average of all days)
-```{r, echo = T}
+
+```r
 ggplot(stepsInterval, aes(x = interval, y = meansteps)) + 
           geom_line(col = "blue") + 
           theme_bw() + 
@@ -70,10 +81,17 @@ ggplot(stepsInterval, aes(x = interval, y = meansteps)) +
           xlab("Time interval")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
 
 ### Time interval containing maximum number of steps
-```{r, echo = T}
+
+```r
 stepsInterval$interval[which.max(stepsInterval$meansteps)]
+```
+
+```
+## [1] 835
 ```
 
 
@@ -83,13 +101,19 @@ stepsInterval$interval[which.max(stepsInterval$meansteps)]
 # Imputing missing values
 
 ### Total number of rows with NAs
-```{r, echo = T}
+
+```r
 sum(is.na(dat))
+```
+
+```
+## [1] 2304
 ```
 
 
 ### Imputing missing values using mean of interval
-```{r, echo = T}
+
+```r
 # Vector containing average nr of steps per interval repeated to be 
 # of same length as dat
 meanStepsN <- rep(stepsInterval$meansteps, times = length(levels(dat$date)))
@@ -101,31 +125,44 @@ for(j in 1:nrow(dati)){
                     dati$steps[j] <- meanStepsN[j]
           }
 }
-``` 
+```
 
 ### Total nr of steps per day with new data set
-```{r, echo = T}
+
+```r
 stepsDayi <- aggregate(dati$steps, by = list(dati$date), FUN = sum)
 names(stepsDayi) <- c("date", "totalsteps")
-
 ```
 
 ### Histogram of total nr of steps with new data set
-```{r, echo = T}
+
+```r
 ggplot(stepsDayi, aes(totalsteps)) + 
           geom_histogram(bins = 50, fill = "dodgerblue", col = "gray71") + 
           theme_bw() + 
           xlab("Total steps per day")
 ```
 
-### Mean and median of total nr of steps taken per day
-```{r, echo = T}
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
+### Mean and median of total nr of steps taken per day
+
+```r
 meanTotali <- mean(stepsDayi$totalsteps)
 meanTotali
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 medianTotali <- median(stepsDayi$totalsteps)
 medianTotali
+```
+
+```
+## [1] 10766.19
 ```
 
 
@@ -133,18 +170,41 @@ medianTotali
 
 
 ### How do the mean and median differ?
-```{r, echo = T}
+
+```r
 # difference in mean (absolute)
 meanTotal - meanTotali
+```
 
+```
+## [1] 0
+```
+
+```r
 # difference in mean (percentage)
 100*(meanTotal - meanTotali)/meanTotal
+```
 
+```
+## [1] 0
+```
+
+```r
 # difference in median (absolute)
 medianTotal - medianTotali
+```
 
+```
+## [1] -1.188679
+```
+
+```r
 # difference in mean (percentage)
 100*(medianTotal - medianTotali)/medianTotal
+```
+
+```
+## [1] -0.01104207
 ```
 
 
@@ -156,7 +216,8 @@ medianTotal - medianTotali
 
 
 ### Create new factor variable
-```{r, echo = T}
+
+```r
 dati$day <- weekdays(as.Date(dati$date))
                      
 dati$weekday <- ifelse(dati$day %in% c("zaterdag","zondag"), 0,1)                     
@@ -164,7 +225,8 @@ dati$weekday <- ifelse(dati$day %in% c("zaterdag","zondag"), 0,1)
 
 
 ## First calculate average nr of steps for weekday and weekend
-```{r, echo = T}
+
+```r
 # frist split the data
 datWeekday <- split(dati,dati$weekday)
 
@@ -178,17 +240,18 @@ stepsWeekend$week <- as.factor("weekend")
 
 # combine both data frames
 stepsIntervali <- rbind(stepsWeekday,stepsWeekend)
-
-
 ```
 
 
 ## Panel plot
-```{r, echo = T}
+
+```r
 ggplot(stepsIntervali, aes(interval,steps)) + 
           geom_line() +
           facet_grid(week ~.)+
           theme_bw()
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 
